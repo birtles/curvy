@@ -3,7 +3,7 @@ define(['stroke-parser'],
 
   test('stroke-width-values: parse values', function() {
     var result =
-      StrokeParser.parseStrokeWidthsValues("1px 30em 50% 2.3seg 0 5rem");
+      StrokeParser.parseStrokeWidthsValues("1px, 30em , 50% ,2.3seg,0, 5rem");
     var isArray = Array.isArray(result);
     ok(isArray, "parses width values list");
     if (!isArray)
@@ -17,5 +17,32 @@ define(['stroke-parser'],
     deepEqual(result[5], { value: 5, unit: "rem" }, "parses rem lengths");
   });
 
-  // XXX Non-lengths
+  test('stroke-width-values: require commas', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsValues("1px 30em"),
+                null, "rejects list without commas - 2 elements");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("1px 30em 5px"),
+                null, "rejects list without commas - 3 elements");
+  });
+
+  test('stroke-width-values: require lengths', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsValues("abc"),
+                null, "rejects string");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("12px, abc"),
+                null, "rejects string in list");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("12"),
+                null, "rejects non-zero plain numbers");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("4em, 12"),
+                null, "rejects non-zero plain numbers in list");
+  });
+
+  /*
+  test('stroke-width-values: require valid units', function() {
+  });
+
+  test('stroke-width-values: reject bad syntax', function() {
+  });
+
+  test('stroke-width-values: accept empty string', function() {
+  });
+  */
 });
