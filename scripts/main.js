@@ -31,7 +31,16 @@ require(["test-cases"], function(predefinedTests) {
   }
 
   // Permalink
-  sourceBox.addEventListener("input", updatePermalink);
+  var sourceBoxLinkTimer;
+  sourceBox.addEventListener("input", function() {
+    if (sourceBoxLinkTimer) {
+      window.clearTimeout(sourceBoxLinkTimer);
+    }
+    sourceBoxLinkTimer = window.setTimeout(function() {
+      sourceBoxLinkTimer = undefined;
+      updatePermalink();
+    }, 300);
+  });
   function updatePermalink() {
     var link = document.getElementById("permalink");
     var params = [
