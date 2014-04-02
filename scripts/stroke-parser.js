@@ -51,7 +51,11 @@ define(["css-value"], function(parseCSSValue) {
     },
 
     parseStrokeWidthsRepeat: function(str) {
+      return str === "repeat" ? this.RepeatMode.Repeat :
+             str === "no-repeat" ? this.RepeatMode.NoRepeat :
+             null;
     },
+
     parseStrokeWidths: function(str) {
     }
   };

@@ -73,6 +73,21 @@ define(['stroke-parser'],
     deepEqual(result[2], { value: 1.2, unit: "seg" }, "parses seg lengths");
   });
 
-  // stroke-widths-repeat
+  test('stroke-widths-repeat: parse values', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsRepeat("repeat"),
+                StrokeParser.RepeatMode.Repeat,
+                "parses stroke-widths-repeat: repeat");
+    strictEqual(StrokeParser.parseStrokeWidthsRepeat("no-repeat"),
+                StrokeParser.RepeatMode.NoRepeat,
+                "parses stroke-widths-repeat: no-repeat");
+    strictEqual(StrokeParser.parseStrokeWidthsRepeat(""),
+                null, "rejects stroke-widths-repeat: (empty string)");
+    strictEqual(StrokeParser.parseStrokeWidthsRepeat("repat"),
+                null, "rejects stroke-widths-repeat: repat");
+    // We deliberately don't test for whitespace stripping since I'm not sure
+    // what we should do there. Last time the SVGWG looked into it, I think HTML
+    // rejects enum values with leading/trailing whitespace.
+  });
+
   // stroke-widths
 });
