@@ -1,6 +1,5 @@
 define(function() {
   return function(callback, timeout) {
-    console.log("creating new timer");
     var timeoutId;
     return {
       trigger: function() {
