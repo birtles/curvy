@@ -38,10 +38,14 @@ define(['stroke-parser'],
   /*
   test('stroke-width-values: require valid units', function() {
   });
+  */
 
   test('stroke-width-values: reject bad syntax', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsValues("1!"),
+                null, "rejects bad syntax");
   });
 
+  /*
   test('stroke-width-values: accept empty string', function() {
   });
   */

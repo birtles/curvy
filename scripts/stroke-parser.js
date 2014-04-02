@@ -7,17 +7,22 @@ define(["css-value"], function(parseCSSValue) {
 
     parseStrokeWidthsValues: function(str) {
       var widths = [];
-      var parsedOk = parseCSSValue(str).every(function(item, i) {
+      try {
+        var tokens = parseCSSValue(str);
+      } catch(e) {
+        return null;
+      }
+      var parsedOk = tokens.every(function(token, i) {
         if (i % 2 === 1) {
           // Check it is comma-separated
-          if (item.type != 'comma')
+          if (token.type != 'comma')
             return false;
         } else {
           // Check it is a valid length
-          if (item.type != "number" ||
-              (item.unit == "" && item.value !== 0))
+          if (token.type != "number" ||
+              (token.unit == "" && token.value !== 0))
             return false;
-          widths.push({ unit: item.unit, value: item.value });
+          widths.push({ unit: token.unit, value: token.value });
         }
         return true;
       });
