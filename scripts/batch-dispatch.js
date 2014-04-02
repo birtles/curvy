@@ -1,4 +1,6 @@
 define(function() {
+  "use strict";
+
   return function(callback, timeout) {
     var timeoutId;
     return {

@@ -1,4 +1,6 @@
 define(["css-value"], function(parseCSSValue) {
+  "use strict";
+
   var validUnits = [ "em", "ex", "ch", "rem", "vw", "vh", "vmin", "vmax",
                      "cm", "mm", "in", "px", "pt", "pc", "%" ];
 

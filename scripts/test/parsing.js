@@ -1,5 +1,5 @@
-define(['stroke-parser'],
-  function(StrokeParser) {
+define(['stroke-parser'], function(StrokeParser) {
+  "use strict";
 
   // stroke-widths-values
 

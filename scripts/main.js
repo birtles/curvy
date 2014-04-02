@@ -1,5 +1,7 @@
 require(["test-cases", "batch-dispatch", "domReady!"],
   function(predefinedTests, BatchTimer) {
+  "use strict";
+
   // Common references
   var sourceBox = document.querySelector("textarea[name=source]");
 
