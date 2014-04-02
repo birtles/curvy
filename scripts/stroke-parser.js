@@ -1,4 +1,7 @@
 define(["css-value"], function(parseCSSValue) {
+  var validUnits = [ "em", "ex", "ch", "rem", "vw", "vh", "vmin", "vmax",
+                     "cm", "mm", "in", "px", "pt", "pc",
+                     "seg", "%" ];
   return {
     RepeatMode: {
       NoRepeat: 0,
@@ -8,7 +11,7 @@ define(["css-value"], function(parseCSSValue) {
     parseStrokeWidthsValues: function(str) {
       var widths = [];
       try {
-        var tokens = parseCSSValue(str);
+        var tokens = parseCSSValue(str.trim());
       } catch(e) {
         return null;
       }
@@ -19,8 +22,10 @@ define(["css-value"], function(parseCSSValue) {
             return false;
         } else {
           // Check it is a valid length
-          if (token.type != "number" ||
-              (token.unit == "" && token.value !== 0))
+          if (token.type != "number")
+            return false;
+          if (validUnits.indexOf(token.unit) === -1 &&
+              !(token.unit == "" && token.value === 0))
             return false;
           widths.push({ unit: token.unit, value: token.value });
         }

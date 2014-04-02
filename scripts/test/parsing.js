@@ -35,18 +35,21 @@ define(['stroke-parser'],
                 null, "rejects non-zero plain numbers in list");
   });
 
-  /*
   test('stroke-width-values: require valid units', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsValues("12km"),
+                null, "rejects bad units");
   });
-  */
 
   test('stroke-width-values: reject bad syntax', function() {
     strictEqual(StrokeParser.parseStrokeWidthsValues("1!"),
                 null, "rejects bad syntax");
   });
 
-  /*
   test('stroke-width-values: accept empty string', function() {
+    var result = StrokeParser.parseStrokeWidthsValues("");
+    ok(Array.isArray(result) && result.length === 0, "parses empty string");
+    result = StrokeParser.parseStrokeWidthsValues("   ");
+    ok(Array.isArray(result) && result.length === 0,
+       "parses whitespace only string");
   });
-  */
 });
