@@ -16,6 +16,7 @@ require(["test-cases", "batch-dispatch", "domReady!"],
   testSelect.addEventListener("change", function(evt) {
     var select = evt.target;
     sourceBox.value = select.options[select.selectedIndex].dataset.src || "";
+    updatePermalink();
   });
 
   // Parse URL params
