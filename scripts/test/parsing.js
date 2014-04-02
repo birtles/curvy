@@ -1,7 +1,7 @@
 define(['stroke-parser'],
   function(StrokeParser) {
 
-  test('stroke-width-values: parse values', function() {
+  test('stroke-widths-values: parse values', function() {
     var result =
       StrokeParser.parseStrokeWidthsValues("1px, 30em , 50% ,2.3seg,0, 5rem");
     var isArray = Array.isArray(result);
@@ -17,14 +17,14 @@ define(['stroke-parser'],
     deepEqual(result[5], { value: 5, unit: "rem" }, "parses rem lengths");
   });
 
-  test('stroke-width-values: require commas', function() {
+  test('stroke-widths-values: require commas', function() {
     strictEqual(StrokeParser.parseStrokeWidthsValues("1px 30em"),
                 null, "rejects list without commas - 2 elements");
     strictEqual(StrokeParser.parseStrokeWidthsValues("1px 30em 5px"),
                 null, "rejects list without commas - 3 elements");
   });
 
-  test('stroke-width-values: require lengths', function() {
+  test('stroke-widths-values: require lengths', function() {
     strictEqual(StrokeParser.parseStrokeWidthsValues("abc"),
                 null, "rejects string");
     strictEqual(StrokeParser.parseStrokeWidthsValues("12px, abc"),
@@ -35,17 +35,17 @@ define(['stroke-parser'],
                 null, "rejects non-zero plain numbers in list");
   });
 
-  test('stroke-width-values: require valid units', function() {
+  test('stroke-widths-values: require valid units', function() {
     strictEqual(StrokeParser.parseStrokeWidthsValues("12km"),
                 null, "rejects bad units");
   });
 
-  test('stroke-width-values: reject bad syntax', function() {
+  test('stroke-widths-values: reject bad syntax', function() {
     strictEqual(StrokeParser.parseStrokeWidthsValues("1!"),
                 null, "rejects bad syntax");
   });
 
-  test('stroke-width-values: accept empty string', function() {
+  test('stroke-widths-values: accept empty string', function() {
     var result = StrokeParser.parseStrokeWidthsValues("");
     ok(Array.isArray(result) && result.length === 0, "parses empty string");
     result = StrokeParser.parseStrokeWidthsValues("   ");
