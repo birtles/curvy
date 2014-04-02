@@ -1,6 +1,8 @@
 define(['stroke-parser'],
   function(StrokeParser) {
 
+  // stroke-widths-values
+
   test('stroke-widths-values: parse values', function() {
     var result =
       StrokeParser.parseStrokeWidthsValues("1px, 30em , 50% ,2.3mm,0, 5rem");
@@ -58,6 +60,8 @@ define(['stroke-parser'],
        "parses whitespace only string");
   });
 
+  // stroke-widths-repeat
+
   test('stroke-widths-positions: parse values', function() {
     // This is most the same code as for stroke-widths-values and is tested
     // above. The only really difference is seg units are allowed here
@@ -72,6 +76,8 @@ define(['stroke-parser'],
     deepEqual(result[1], { value: 10, unit: "%" }, "parses em lengths");
     deepEqual(result[2], { value: 1.2, unit: "seg" }, "parses seg lengths");
   });
+
+  // stroke-widths-repeat
 
   test('stroke-widths-repeat: parse values', function() {
     strictEqual(StrokeParser.parseStrokeWidthsRepeat("repeat"),
@@ -90,4 +96,35 @@ define(['stroke-parser'],
   });
 
   // stroke-widths
+
+  test('stroke-widths: parse values', function() {
+    var result = StrokeParser.parseStrokeWidths(
+      "1px 50%, 50% 2.3seg ,2.3mm,0 repeat");
+    var isObject = typeof result === "object" && result !== null;
+    ok(isObject, "parses widths shorthand");
+    if (!isObject)
+      return;
+    equal(result.widths.length, 4, "gets correct number of widths");
+    var widths = result.widths;
+    deepEqual(widths[0], { width: { value: 1, unit: "px" },
+                           position: { value: 50, unit: "%" } },
+              "parses width and position pair");
+    deepEqual(widths[1], { width: { value: 50, unit: "%" },
+                           position: { value: 2.3, unit: "seg" } },
+              "parses width and position pair with seg unit");
+    deepEqual(widths[2], { width: { value: 2.3, unit: "mm" }, position: null },
+              "parses width only");
+    deepEqual(widths[3], { width: { value: 0, unit: "" }, position: null },
+              "parses width only with zero value");
+    equal(result.repeatMode, StrokeParser.RepeatMode.Repeat,
+          "gets repeat mode");
+  });
+
+  // comma-separated
+  // repeat at end is optional
+  // repeat only
+  // double space between width and position
+  // seg value alone is disallowed
+  // empty string is ok
+  // bad syntax
 });
