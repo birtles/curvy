@@ -1,4 +1,4 @@
-require(["test-cases", "batch-dispatch"],
+require(["test-cases", "batch-dispatch", "domReady!"],
   function(predefinedTests, BatchTimer) {
   // Common references
   var sourceBox = document.querySelector("textarea[name=source]");
