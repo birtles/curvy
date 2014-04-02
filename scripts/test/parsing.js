@@ -120,11 +120,69 @@ define(['stroke-parser'],
           "gets repeat mode");
   });
 
-  // comma-separated
-  // repeat at end is optional
-  // repeat only
-  // double space between width and position
-  // seg value alone is disallowed
-  // empty string is ok
-  // bad syntax
+  test('stroke-widths: single value', function() {
+    deepEqual(StrokeParser.parseStrokeWidths("1px 30em no-repeat"),
+              { repeatMode: StrokeParser.RepeatMode.NoRepeat,
+                widths: [ { width: { value: 1, unit: "px" },
+                            position: { value: 30, unit: "em" } } ] },
+              "parses list with single width-position pair and repeat mode");
+    deepEqual(StrokeParser.parseStrokeWidths("1px 30em"),
+              { repeatMode: null,
+                widths: [ { width: { value: 1, unit: "px" },
+                            position: { value: 30, unit: "em" } } ] },
+              "parses list with single width-position pair");
+    deepEqual(StrokeParser.parseStrokeWidths("7px"),
+              { repeatMode: null,
+                widths: [ { width: { value: 7, unit: "px" },
+                            position: null } ] },
+              "parses list with single width");
+    deepEqual(StrokeParser.parseStrokeWidths("0"),
+              { repeatMode: null,
+                widths: [ { width: { value: 0, unit: "" },
+                            position: null } ] },
+              "parses list with single 0 width");
+    deepEqual(StrokeParser.parseStrokeWidths("repeat"),
+              { repeatMode: StrokeParser.RepeatMode.Repeat,
+                widths: [ ] },
+              "parses list with single repeat value");
+    deepEqual(StrokeParser.parseStrokeWidths("7px  no-repeat"),
+              { repeatMode: StrokeParser.RepeatMode.NoRepeat,
+                widths: [ { width: { value: 7, unit: "px" },
+                            position: null } ] },
+              "parses list with single width and repeat mode");
+  });
+
+  test('stroke-widths: empty string', function() {
+    deepEqual(StrokeParser.parseStrokeWidths(""),
+              { repeatMode: null, widths: [ ] },
+              "parses empty string");
+    deepEqual(StrokeParser.parseStrokeWidths("   "),
+              { repeatMode: null, widths: [ ] },
+              "parses whitespace string");
+  });
+
+  test('stroke-widths: require commas', function() {
+    strictEqual(StrokeParser.parseStrokeWidths("1px 30em 2px"),
+                null, "rejects list without commas");
+    strictEqual(StrokeParser.parseStrokeWidths("1px 30em 2px repeat"),
+                null, "rejects list without commas");
+  });
+
+  test('stroke-widths: double space in pair', function() {
+    deepEqual(StrokeParser.parseStrokeWidths("1cm  30seg  no-repeat"),
+              { repeatMode: StrokeParser.RepeatMode.NoRepeat,
+                widths: [ { width: { value: 1, unit: "cm" },
+                            position: { value: 30, unit: "seg" } } ] },
+              "parses width-position pair with double space");
+  });
+
+  test('stroke-widths: seg value alone', function() {
+    strictEqual(StrokeParser.parseStrokeWidths("2seg"),
+                null, "rejects seg value alone");
+  });
+
+  test('stroke-widths: bad syntax', function() {
+    strictEqual(StrokeParser.parseStrokeWidths("1cm 3px, 4cm 5!"),
+                null, "rejects bad syntax");
+  });
 });

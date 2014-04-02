@@ -66,17 +66,18 @@ define(["css-value"], function(parseCSSValue) {
     parseStrokeWidths: function(str) {
       // Syntax: [<value> <position>?]# <repeat>?
       // Split off final repeat
-      var matches = str.match(/(.*?)(?: (repeat|no-repeat))?$/);
+      var matches = str.match(/(.*?)(?:(?:^| )(repeat|no-repeat))?$/);
       if (!matches)
         return null;
 
       // Parse width (position) pairs
       var widths = [];
-      var pairs = matches[1].trim().split(",");
+      var widthsList = matches[1].trim();
+      var pairs = widthsList ? widthsList.split(",") : [];
       var parsedOk = pairs.every(function(pair) {
         var result = { width: null, position: null };
         pair = pair.trim();
-        var parts = pair.split(" ");
+        var parts = pair.split(/\s+/);
         if (parts.length > 2)
           return false;
         result.width =
@@ -96,9 +97,12 @@ define(["css-value"], function(parseCSSValue) {
         return null;
 
       // Parse final repeat
-      var repeatMode = this.parseStrokeWidthsRepeat(matches[2]);
-      if (repeatMode === null)
-        return null;
+      var repeatMode = null;
+      if (matches.length >= 3 && matches[2]) {
+        repeatMode = this.parseStrokeWidthsRepeat(matches[2]);
+        if (repeatMode === null)
+          return null;
+      }
 
       return { widths: widths, repeatMode: repeatMode };
     }
