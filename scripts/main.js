@@ -1,4 +1,6 @@
 require(["test-cases"], function(predefinedTests) {
+  // Common references
+  var sourceBox = document.querySelector("textarea[name=source]");
 
   // Pre-defined test cases
   var testSelect = document.querySelector("select[name=preset-test]");
@@ -10,8 +12,7 @@ require(["test-cases"], function(predefinedTests) {
   });
   testSelect.addEventListener("change", function(evt) {
     var select = evt.target;
-    var src = select.options[select.selectedIndex].dataset.src || "";
-    document.querySelector("textarea[name=source]").value = src;
+    sourceBox.value = select.options[select.selectedIndex].dataset.src || "";
   });
 
   // Parse URL params
@@ -24,8 +25,24 @@ require(["test-cases"], function(predefinedTests) {
     var value = decodeURIComponent(pair[1]);
     switch(key) {
       case 'src':
-        document.querySelector("textarea[name=source]").value = value;
+        sourceBox.value = value;
         break;
     }
+  }
+
+  // Permalink
+  sourceBox.addEventListener("input", updatePermalink);
+  function updatePermalink() {
+    var link = document.getElementById("permalink");
+    var params = [
+        { key: "src",
+          value: sourceBox.value }
+      ];
+    var queryString =
+      params.map(function(param) {
+        return encodeURIComponent(param.key) + '=' +
+               encodeURIComponent(param.value);
+      }).join("&");
+    link.href = "?" + queryString;
   }
 });
