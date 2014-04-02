@@ -8,7 +8,11 @@ define(["css-value"], function(parseCSSValue) {
   };
 
   function parseLengthOrPercentage(str, allowedUnits) {
-    var tokens = parseCSSValue(str);
+    try {
+      var tokens = parseCSSValue(str);
+    } catch(e) {
+      return null;
+    }
     if (tokens.length > 1)
       return null;
     var token = tokens[0];
@@ -24,32 +28,19 @@ define(["css-value"], function(parseCSSValue) {
   }
 
   function parseLengthAndPercentageList(str, allowedUnits) {
-    var values = [];
-    try {
-      var tokens = parseCSSValue(str.trim());
-    } catch(e) {
-      return null;
-    }
-    var parsedOk = tokens.every(function(token, i) {
-      if (i % 2 === 1) {
-        // Check it is comma-separated
-        if (token.type != "comma")
-          return false;
-      } else {
-        // Check it is a valid length
-        if (token.type != "number")
-          return false;
-        var validUnit =
-          validUnits.indexOf(token.unit) !== -1 ||
-          (allowedUnits === AllowedUnits.AllowSeg && token.unit === "seg") ||
-          (token.unit === "" && token.value === 0);
-        if (!validUnit)
-          return false;
-        values.push({ unit: token.unit, value: token.value });
-      }
+    var result = [];
+    str = str.trim();
+    if (!str.length)
+      return result;
+    var values = str.split(",");
+    var parsedOk = values.every(function(value, i) {
+      var lengthOrPercent = parseLengthOrPercentage(value.trim(), allowedUnits);
+      if (!lengthOrPercent)
+        return false;
+      result.push(lengthOrPercent);
       return true;
     });
-    return parsedOk ? values : null;
+    return parsedOk ? result : null;
   }
 
   return {
