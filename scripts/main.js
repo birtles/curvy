@@ -1,4 +1,5 @@
-require(["test-cases"], function(predefinedTests) {
+require(["test-cases", "batch-dispatch"],
+  function(predefinedTests, BatchTimer) {
   // Common references
   var sourceBox = document.querySelector("textarea[name=source]");
 
@@ -31,16 +32,8 @@ require(["test-cases"], function(predefinedTests) {
   }
 
   // Permalink
-  var sourceBoxLinkTimer;
-  sourceBox.addEventListener("input", function() {
-    if (sourceBoxLinkTimer) {
-      window.clearTimeout(sourceBoxLinkTimer);
-    }
-    sourceBoxLinkTimer = window.setTimeout(function() {
-      sourceBoxLinkTimer = undefined;
-      updatePermalink();
-    }, 300);
-  });
+  var sourceBoxLinkTimer = new BatchTimer(updatePermalink, 300);
+  sourceBox.addEventListener("input", sourceBoxLinkTimer.trigger);
   function updatePermalink() {
     var link = document.getElementById("permalink");
     var params = [
