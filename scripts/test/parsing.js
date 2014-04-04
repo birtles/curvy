@@ -11,12 +11,56 @@ define(['stroke-parser'], function(StrokeParser) {
     if (!isArray)
       return;
     equal(result.length, 6, "gets correct number of widths");
-    deepEqual(result[0], { value: 1, unit: "px" }, "parses pixel lengths");
-    deepEqual(result[1], { value: 30, unit: "em" }, "parses em lengths");
-    deepEqual(result[2], { value: 50, unit: "%" }, "parses percentages");
-    deepEqual(result[3], { value: 2.3, unit: "mm" }, "parses seg lengths");
-    deepEqual(result[4], { value: 0, unit: "" }, "parses 0 values");
-    deepEqual(result[5], { value: 5, unit: "rem" }, "parses rem lengths");
+    deepEqual(result[0], { left: { value: 1, unit: "px" }, right: null },
+              "parses pixel lengths");
+    deepEqual(result[1], { left: { value: 30, unit: "em" }, right: null },
+              "parses em lengths");
+    deepEqual(result[2], { left: { value: 50, unit: "%" }, right: null },
+              "parses percentages");
+    deepEqual(result[3], { left: { value: 2.3, unit: "mm" }, right: null },
+              "parses seg lengths");
+    deepEqual(result[4], { left: { value: 0, unit: "" }, right: null },
+              "parses 0 values");
+    deepEqual(result[5], { left: { value: 5, unit: "rem" }, right: null },
+              "parses rem lengths");
+  });
+
+  test('stroke-widths-values: parse asymmetric values', function() {
+    var result =
+      StrokeParser.parseStrokeWidthsValues(
+        "1px/30em , 50%  /  2.3mm,0,1cm/ 0");
+    var isArray = Array.isArray(result);
+    ok(isArray, "parses width values list");
+    if (!isArray)
+      return;
+    equal(result.length, 4, "gets correct number of widths");
+    deepEqual(result[0],
+              { left: { value: 1, unit: "px" },
+                right: { value: 30, unit: "em" } },
+              "parses asymmetric values");
+    deepEqual(result[1],
+              { left: { value: 50, unit: "%" },
+                right: { value: 2.3, unit: "mm" } },
+              "parses asymmetric values with spaces");
+    deepEqual(result[2], { left: { value: 0, unit: "" }, right: null },
+              "parses symmetric values amidst asymmetric values");
+    deepEqual(result[3],
+              { left: { value: 1, unit: "cm" },
+                right: { value: 0, unit: "" } },
+              "parses zero in asymmetric value");
+  });
+
+  test('stroke-widths-values: reject bad asymmetric values', function() {
+    strictEqual(StrokeParser.parseStrokeWidthsValues("1px/"),
+                null, "rejects stray trailing slash");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("/1px"),
+                null, "rejects stray leading slash");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("/1px/"),
+                null, "rejects stray leading and trailing slash");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("/"),
+                null, "rejects lonely slash");
+    strictEqual(StrokeParser.parseStrokeWidthsValues("1px/1px/1px"),
+                null, "rejects too many widths");
   });
 
   test('stroke-widths-values: require commas', function() {
@@ -60,7 +104,7 @@ define(['stroke-parser'], function(StrokeParser) {
        "parses whitespace only string");
   });
 
-  // stroke-widths-repeat
+  // stroke-widths-positions
 
   test('stroke-widths-positions: parse values', function() {
     // This is most the same code as for stroke-widths-values and is tested
@@ -106,15 +150,21 @@ define(['stroke-parser'], function(StrokeParser) {
       return;
     equal(result.widths.length, 4, "gets correct number of widths");
     var widths = result.widths;
-    deepEqual(widths[0], { width: { value: 1, unit: "px" },
+    deepEqual(widths[0], { left: { value: 1, unit: "px" },
+                           right: null,
                            position: { value: 50, unit: "%" } },
               "parses width and position pair");
-    deepEqual(widths[1], { width: { value: 50, unit: "%" },
+    deepEqual(widths[1], { left: { value: 50, unit: "%" },
+                           right: null,
                            position: { value: 2.3, unit: "seg" } },
               "parses width and position pair with seg unit");
-    deepEqual(widths[2], { width: { value: 2.3, unit: "mm" }, position: null },
+    deepEqual(widths[2], { left: { value: 2.3, unit: "mm" },
+                           right: null,
+                           position: null },
               "parses width only");
-    deepEqual(widths[3], { width: { value: 0, unit: "" }, position: null },
+    deepEqual(widths[3], { left: { value: 0, unit: "" },
+                           right: null,
+                           position: null },
               "parses width only with zero value");
     equal(result.repeatMode, StrokeParser.RepeatMode.Repeat,
           "gets repeat mode");
@@ -123,22 +173,26 @@ define(['stroke-parser'], function(StrokeParser) {
   test('stroke-widths: single value', function() {
     deepEqual(StrokeParser.parseStrokeWidths("1px 30em no-repeat"),
               { repeatMode: StrokeParser.RepeatMode.NoRepeat,
-                widths: [ { width: { value: 1, unit: "px" },
+                widths: [ { left: { value: 1, unit: "px" },
+                            right: null,
                             position: { value: 30, unit: "em" } } ] },
               "parses list with single width-position pair and repeat mode");
     deepEqual(StrokeParser.parseStrokeWidths("1px 30em"),
               { repeatMode: null,
-                widths: [ { width: { value: 1, unit: "px" },
+                widths: [ { left: { value: 1, unit: "px" },
+                            right: null,
                             position: { value: 30, unit: "em" } } ] },
               "parses list with single width-position pair");
     deepEqual(StrokeParser.parseStrokeWidths("7px"),
               { repeatMode: null,
-                widths: [ { width: { value: 7, unit: "px" },
+                widths: [ { left: { value: 7, unit: "px" },
+                            right: null,
                             position: null } ] },
               "parses list with single width");
     deepEqual(StrokeParser.parseStrokeWidths("0"),
               { repeatMode: null,
-                widths: [ { width: { value: 0, unit: "" },
+                widths: [ { left: { value: 0, unit: "" },
+                            right: null,
                             position: null } ] },
               "parses list with single 0 width");
     deepEqual(StrokeParser.parseStrokeWidths("repeat"),
@@ -147,7 +201,8 @@ define(['stroke-parser'], function(StrokeParser) {
               "parses list with single repeat value");
     deepEqual(StrokeParser.parseStrokeWidths("7px  no-repeat"),
               { repeatMode: StrokeParser.RepeatMode.NoRepeat,
-                widths: [ { width: { value: 7, unit: "px" },
+                widths: [ { left: { value: 7, unit: "px" },
+                            right: null,
                             position: null } ] },
               "parses list with single width and repeat mode");
   });
@@ -171,7 +226,8 @@ define(['stroke-parser'], function(StrokeParser) {
   test('stroke-widths: double space in pair', function() {
     deepEqual(StrokeParser.parseStrokeWidths("1cm  30seg  no-repeat"),
               { repeatMode: StrokeParser.RepeatMode.NoRepeat,
-                widths: [ { width: { value: 1, unit: "cm" },
+                widths: [ { left: { value: 1, unit: "cm" },
+                            right: null,
                             position: { value: 30, unit: "seg" } } ] },
               "parses width-position pair with double space");
   });

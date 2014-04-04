@@ -15,7 +15,7 @@ define(["css-value"], function(parseCSSValue) {
     } catch(e) {
       return null;
     }
-    if (tokens.length > 1)
+    if (tokens.length !== 1)
       return null;
     var token = tokens[0];
     if (token.type != "number")
@@ -29,20 +29,44 @@ define(["css-value"], function(parseCSSValue) {
     return { unit: token.unit, value: token.value };
   }
 
-  function parseLengthAndPercentageList(str, allowedUnits) {
-    var result = [];
-    str = str.trim();
-    if (!str.length)
-      return result;
-    var values = str.split(",");
-    var parsedOk = values.every(function(value, i) {
-      var lengthOrPercent = parseLengthOrPercentage(value.trim(), allowedUnits);
-      if (!lengthOrPercent)
-        return false;
-      result.push(lengthOrPercent);
-      return true;
-    });
-    return parsedOk ? result : null;
+  function parseStrokeWidth(str) {
+    var parts = str.split(/\s*\/\s*/);
+    if (parts.length > 2)
+      return null;
+    var widths = parts.map(function(part) {
+        return parseLengthOrPercentage(part.trim(), AllowedUnits.DontAllowSeg);
+      });
+    return widths.indexOf(null) === -1 ?
+           { left: widths[0], right: widths.length == 2 ? widths[1] : null } :
+           null;
+  }
+
+  function parseStrokeWidthAndPosition(str) {
+    var matches =
+      str.match(/^\s*([^\s/]+)(?:\s*\/\s*([^\s/]+))?\s*([^\s/]+)?\s*$/);
+    if (!matches)
+      return null;
+    var left =
+      parseLengthOrPercentage(matches[1], AllowedUnits.DontAllowSeg);
+    if (!left)
+      return null;
+    var right = null;
+    if (matches[2]) {
+      right = parseLengthOrPercentage(matches[2], AllowedUnits.DontAllowSeg);
+      if (!right)
+        return null;
+    }
+    var position = null;
+    if (matches[3]) {
+      position = parseLengthOrPercentage(matches[3], AllowedUnits.AllowSeg);
+      if (!position)
+        return null;
+    }
+    return {
+      left: left,
+      right: right,
+      position: position
+    };
   }
 
   return {
@@ -52,11 +76,24 @@ define(["css-value"], function(parseCSSValue) {
     },
 
     parseStrokeWidthsValues: function(str) {
-      return parseLengthAndPercentageList(str, AllowedUnits.DontAllowSeg);
+      str = str.trim();
+      if (!str.length)
+        return [];
+      var widths = str.split(",").map(function(value) {
+          return parseStrokeWidth(value);
+        });
+      return widths.indexOf(null) === -1 ? widths : null;
     },
 
     parseStrokeWidthsPositions: function(str) {
-      return parseLengthAndPercentageList(str, AllowedUnits.AllowSeg);
+      var result = [];
+      str = str.trim();
+      if (!str.length)
+        return result;
+      var result = str.split(",").map(function(value) {
+          return parseLengthOrPercentage(value.trim(), AllowedUnits.AllowSeg);
+        });
+      return result.indexOf(null) === -1 ? result : null;
     },
 
     parseStrokeWidthsRepeat: function(str) {
@@ -66,36 +103,17 @@ define(["css-value"], function(parseCSSValue) {
     },
 
     parseStrokeWidths: function(str) {
-      // Syntax: [<value> <position>?]# <repeat>?
+      // Syntax: [<width>(/<width>)? <position>?]# <repeat>?
       // Split off final repeat
       var matches = str.match(/(.*?)(?:(?:^| )(repeat|no-repeat))?$/);
       if (!matches)
         return null;
 
-      // Parse width (position) pairs
-      var widths = [];
-      var widthsList = matches[1].trim();
-      var pairs = widthsList ? widthsList.split(",") : [];
-      var parsedOk = pairs.every(function(pair) {
-        var result = { width: null, position: null };
-        pair = pair.trim();
-        var parts = pair.split(/\s+/);
-        if (parts.length > 2)
-          return false;
-        result.width =
-          parseLengthOrPercentage(parts[0], AllowedUnits.DontAllowSeg);
-        if (!result.width)
-          return false;
-        if (parts.length === 2) {
-          result.position =
-            parseLengthOrPercentage(parts[1], AllowedUnits.AllowSeg);
-          if (!result.position)
-            return false;
-        }
-        widths.push(result);
-        return true;
-      });
-      if (!parsedOk)
+      // Parse width(/width) (position) values
+      var list = matches[1].trim();
+      var listItems = list ? list.split(",") : [];
+      var widths = listItems.map(parseStrokeWidthAndPosition);
+      if (widths.indexOf(null) !== -1)
         return null;
 
       // Parse final repeat
