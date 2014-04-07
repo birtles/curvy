@@ -131,8 +131,22 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-positions: 50%, 80%, 90%');
   });
 
-  // stroke-widths-positions and stroke-widths-values
-  //  -- extra values
+  test('Less stroke-widths-positions than stroke-widths-values', function() {
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px, 30px");
+    pathElem.setAttribute("stroke-widths-positions", "50%");
+    compareWidths([ [ 0, 10, 10 ], [ 0.5, 10, 10 ],
+                    [ 0.75, 20, 20 ], [ 1.0, 30, 30 ] ],
+                  'stroke-widths-values: 10px, 20px, 30px; ' +
+                  'stroke-widths-positions: 50%');
+
+    // Final value > 100
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px, 30px");
+    pathElem.setAttribute("stroke-widths-positions", "50%, 120%");
+    compareWidths([ [ 0, 10, 10 ], [ 0.5, 10, 10 ],
+                    [ 1.2, 20, 20 ], [ 1.2, 30, 30 ] ],
+                  'stroke-widths-values: 10px, 20px, 30px; ' +
+                  'stroke-widths-positions: 50%, 120%');
+  });
 
   /*
   test('Shorthand only', function () {

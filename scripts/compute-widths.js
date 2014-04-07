@@ -34,21 +34,17 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     var positions = [];
     if (!properties.strokeWidthsValues) {
       widths = [ { left: baseStrokeWidth, right: baseStrokeWidth } ];
-      positions = [ { value: 0, unit: "%" } ];
     } else {
       properties.strokeWidthsValues.forEach(function(widthValue, index) {
         widths.push({ left:  widthValue.left,
                       right: widthValue.right || widthValue.left });
       });
-      positions = properties.strokeWidthsPositions ||
-                  Array.apply(null, { length: widths.length }
-                  ).map(Function.call,
-                    function(index, array) {
-                      return { value: index ?
-                                      index / (array.length - 1) * 100 :
-                                      0,
-                               unit: "%" };
-                  });
+      positions = properties.strokeWidthsPositions;
+    }
+
+    // Fill in positions
+    if (!positions) {
+      positions = [ { value: 0, unit: "%" } ];
     }
 
     // If there is only value, ignore the positions
@@ -63,13 +59,23 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       return { left: cssWidth.left.value,
                right: cssWidth.right.value };
     });
-    var pxPositions = positions.map(function(cssPosition) {
+    var pcPositions = positions.map(function(cssPosition) {
       return cssPosition.value / 100;
     });
 
+    // If there are fewer positions than values, fill them in
+    if (pcPositions.length < pxWidths.length) {
+      var lower = pcPositions[pcPositions.length - 1];
+      var upper = Math.max(lower, 1);
+      var items = pxWidths.length - pcPositions.length;
+      for (var i = 1; i <= items; i++) {
+        pcPositions.push((i / items) * (upper - lower) + lower);
+      }
+    }
+
     // Merge arrays
     var combinedWidths = pxWidths.map(function(pxWidth, index) {
-      return { offset: pxPositions[index],
+      return { offset: pcPositions[index],
                left: pxWidth.left,
                right: pxWidth.right };
     });
