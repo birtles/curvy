@@ -16,10 +16,11 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       "stroke-widths-values",
       "stroke-widths-repeat",
       "stroke-widths" ].forEach(function(property) {
-      var parseFunc = StrokeParser[dashToCamel("parse-" + property)];
+      var parseFunc =
+        StrokeParser[dashToCamel("parse-" + property)].bind(StrokeParser);
       if (pathElem.hasAttribute(property)) {
         var parseResult = parseFunc(pathElem.getAttribute(property));
-        if (parseResult) {
+        if (parseResult !== null) {
           properties[dashToCamel(property)] = parseResult;
         } else {
           parseErrors.push(property);

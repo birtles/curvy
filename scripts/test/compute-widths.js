@@ -80,8 +80,18 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-values: 10px / 20px, 30px');
   });
 
-  // stroke-widths-positions only
-  // stroke-widths-repeat only
+  test('stroke-widths-positions only', function () {
+    pathElem.setAttribute("stroke-widths-positions", "10px, 20px");
+    compareWidths([ [ 0, 7, 7 ], [ 1, 7, 7 ] ],
+                  'stroke-widths-positions: 10px, 20px');
+  });
+
+  test('stroke-widths-repeat only', function () {
+    pathElem.setAttribute("stroke-widths-repeat", "no-repeat");
+    compareWidths([ [ 0, 7, 7 ], [ 1, 7, 7 ] ],
+                  'stroke-widths-repeat: no-repeat');
+  });
+
   // stroke-widths-positions and stroke-widths-values
 
   /*
