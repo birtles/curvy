@@ -7,7 +7,6 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
   }
 
   return function(pathElem) {
-    var widths = [];
     var parseErrors = [];
 
     // Parse parameters
@@ -31,32 +30,68 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     // Apply cascade
     var baseStrokeWidth =
       parseCSSValue(window.getComputedStyle(pathElem).strokeWidth)[0];
-    if (properties.strokeWidthsValues) {
-      if (properties.strokeWidthsValues.length === 1) {
-        properties.strokeWidthsValues.push(properties.strokeWidthsValues[0]);
-      }
-      properties.strokeWidthsValues.forEach(function(widthValue, index) {
-        widths.push(
-          { offset: index / (properties.strokeWidthsValues.length - 1),
-            left:  widthValue.left,
-            right: widthValue.right || widthValue.left });
-      });
+    var widths = [];
+    var positions = [];
+    if (!properties.strokeWidthsValues) {
+      widths = [ { left: baseStrokeWidth, right: baseStrokeWidth } ];
+      positions = [ { value: 0, unit: "%" } ];
     } else {
-      widths = [ { offset: 0, left: baseStrokeWidth, right: baseStrokeWidth },
-                 { offset: 1, left: baseStrokeWidth, right: baseStrokeWidth } ];
+      properties.strokeWidthsValues.forEach(function(widthValue, index) {
+        widths.push({ left:  widthValue.left,
+                      right: widthValue.right || widthValue.left });
+      });
+      positions = properties.strokeWidthsPositions ||
+                  Array.apply(null, { length: widths.length }
+                  ).map(Function.call,
+                    function(index, array) {
+                      return { value: index ?
+                                      index / (array.length - 1) * 100 :
+                                      0,
+                               unit: "%" };
+                  });
+    }
+
+    // If there is only value, ignore the positions
+    if (widths.length === 1) {
+      positions = [ { value: 0, unit: "%" } ];
     }
 
     // Apply repeating, list length adjustment
 
     // Convert values
     var pxWidths = widths.map(function(cssWidth) {
-      return { offset: cssWidth.offset,
-               left: cssWidth.left.value,
+      return { left: cssWidth.left.value,
                right: cssWidth.right.value };
     });
+    var pxPositions = positions.map(function(cssPosition) {
+      return cssPosition.value / 100;
+    });
+
+    // Merge arrays
+    var combinedWidths = pxWidths.map(function(pxWidth, index) {
+      return { offset: pxPositions[index],
+               left: pxWidth.left,
+               right: pxWidth.right };
+    });
+
+    // Make sure there is a position at or before 0
+    var first = combinedWidths[0];
+    if (first.offset > 0) {
+      combinedWidths.unshift({ left: first.left,
+                               right: first.right,
+                               offset: 0 });
+    }
+
+    // Make sure there is a position at or after 1
+    var last = combinedWidths[combinedWidths.length - 1];
+    if (last.offset < 1) {
+      combinedWidths.push({ left: last.left,
+                            right: last.right,
+                            offset: 1 });
+    }
 
     return {
-              widths: pxWidths,
+              widths: combinedWidths,
               parseErrors: parseErrors
            };
   }

@@ -92,7 +92,31 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-repeat: no-repeat');
   });
 
+  test('stroke-widths-values and stroke-widths-positions, equal length',
+  function() {
+    pathElem.setAttribute("stroke-widths-values", "10px");
+    pathElem.setAttribute("stroke-widths-positions", "50%");
+    compareWidths([ [ 0, 10, 10 ], [ 1, 10, 10 ] ],
+                  'stroke-widths-values: 10px; stroke-widths-positions: 50%');
+
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "50%, 80%");
+    compareWidths([ [ 0, 10, 10 ], [ 0.5, 10, 10 ], [ 0.8, 20, 20 ],
+                    [ 1, 20, 20 ] ],
+                  'stroke-widths-values: 10px, 20px; ' +
+                  'stroke-widths-positions: 50%, 80%');
+
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px, 30px");
+    pathElem.setAttribute("stroke-widths-positions", "50%, 80%, 120%");
+    compareWidths([ [ 0, 10, 10 ], [ 0.5, 10, 10 ], [ 0.8, 20, 20 ],
+                    [ 1.2, 30, 30 ] ],
+                  'stroke-widths-values: 10px, 20px, 30px; ' +
+                  'stroke-widths-positions: 50%, 80%, 120%');
+  });
+
   // stroke-widths-positions and stroke-widths-values
+  //  -- extra positions
+  //  -- extra values
 
   /*
   test('Shorthand only', function () {
