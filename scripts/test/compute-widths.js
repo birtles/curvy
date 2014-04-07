@@ -114,8 +114,24 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-positions: 50%, 80%, 120%');
   });
 
+  test('Less stroke-widths-values than stroke-widths-positions', function() {
+    // Single value
+    pathElem.setAttribute("stroke-widths-values", "10px");
+    pathElem.setAttribute("stroke-widths-positions", "50%, 100%");
+    compareWidths([ [ 0, 10, 10 ], [ 1, 10, 10 ] ],
+                  'stroke-widths-values: 10px; ' +
+                  'stroke-widths-positions: 50%, 100%');
+
+    // Two values
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "50%, 80%, 90%");
+    compareWidths([ [ 0, 10, 10 ], [ 0.5, 10, 10 ], [ 0.8, 20, 20 ],
+                    [ 1, 20, 20 ] ],
+                  'stroke-widths-values: 10px, 20px; ' +
+                  'stroke-widths-positions: 50%, 80%, 90%');
+  });
+
   // stroke-widths-positions and stroke-widths-values
-  //  -- extra positions
   //  -- extra values
 
   /*
