@@ -2,6 +2,6 @@ require.config({
   baseUrl: '..',
 });
 
-require(['test/parsing'], function() {
+require(['test/parsing', 'test/compute-widths'], function() {
   QUnit.start();
 });

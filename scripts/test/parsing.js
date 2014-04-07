@@ -1,6 +1,8 @@
 define(['stroke-parser'], function(StrokeParser) {
   "use strict";
 
+  QUnit.module('Parsing');
+
   // stroke-widths-values
 
   test('stroke-widths-values: parse values', function() {
