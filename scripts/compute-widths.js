@@ -1,4 +1,4 @@
-define(["stroke-parser"], function(StrokeParser) {
+define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
   "use strict";
 
   function dashToCamel(str) {
@@ -29,7 +29,7 @@ define(["stroke-parser"], function(StrokeParser) {
 
     // Apply cascade
     var baseStrokeWidth =
-      parseFloat(window.getComputedStyle(pathElem).strokeWidth);
+      parseCSSValue(window.getComputedStyle(pathElem).strokeWidth)[0];
     if (properties.strokeWidthsValues) {
       if (properties.strokeWidthsValues.length === 1) {
         properties.strokeWidthsValues.push(properties.strokeWidthsValues[0]);
@@ -37,10 +37,8 @@ define(["stroke-parser"], function(StrokeParser) {
       properties.strokeWidthsValues.forEach(function(widthValue, index) {
         widths.push(
           { offset: index / (properties.strokeWidthsValues.length - 1),
-            left:  widthValue.left.value,
-            right: widthValue.right ?
-                   widthValue.right.value :
-                   widthValue.left.value });
+            left:  widthValue.left,
+            right: widthValue.right || widthValue.left });
       });
     } else {
       widths = [ { offset: 0, left: baseStrokeWidth, right: baseStrokeWidth },
@@ -50,9 +48,14 @@ define(["stroke-parser"], function(StrokeParser) {
     // Apply repeating, list length adjustment
 
     // Convert values
+    var pxWidths = widths.map(function(cssWidth) {
+      return { offset: cssWidth.offset,
+               left: cssWidth.left.value,
+               right: cssWidth.right.value };
+    });
 
     return {
-              widths: widths,
+              widths: pxWidths,
               parseErrors: parseErrors
            };
   }
