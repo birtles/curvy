@@ -245,7 +245,7 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-repeat: repeat');
   });
 
-  // Extend positions (by 1seg) when all positions are segments
+  // XXX Extend positions (by 1seg) when all positions are segments
 
   test('Shorthand only', function () {
     pathElem.setAttribute("stroke-widths", "1px / 2px 10%, 30px 50%, 50px");
