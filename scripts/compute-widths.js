@@ -62,6 +62,73 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     }
   }
 
+  function getNumDrawingSegments(pathElem) {
+    var segList = pathElem.pathSegList;
+    var numSegments = 0;
+    for (var i = 0; i < segList.numberOfItems; i++) {
+      var segType = segList.getItem(i).pathSegType;
+      if (segType == SVGPathSeg.PATHSEG_MOVETO_ABS ||
+          segType == SVGPathSeg.PATHSEG_MOVETO_REL)
+        continue;
+      numSegments++;
+    }
+    return numSegments;
+  }
+
+  function segmentRefToLength(segmentRef, pathElem) {
+    if (segmentRef <= 0)
+      return 0;
+
+    var pathClone = pathElem.cloneNode();
+    pathClone.setAttribute("d", pathElem.getAttribute("d"));
+    var segList = pathClone.pathSegList;
+    var segmentIndex = Math.floor(segmentRef);
+    var segmentFraction = segmentRef - segmentIndex;
+
+    if (segmentIndex >= getNumDrawingSegments(pathClone)) {
+      return pathClone.getTotalLength();
+    }
+
+    while (getNumDrawingSegments(pathClone) >
+           (segmentFraction == 0 ? segmentIndex : segmentIndex + 1)) {
+      segList.removeItem(segList.numberOfItems - 1);
+    }
+    if (segmentFraction == 0) {
+      return pathClone.getTotalLength();
+    }
+
+    var lengthWithSegment = 0;
+    try {
+      lengthWithSegment = pathClone.getTotalLength();
+    } catch (e) { }
+    segList.removeItem(segList.numberOfItems - 1);
+    var lengthWithoutSegment = 0;
+    try {
+      lengthWithoutSegment = pathClone.getTotalLength();
+    } catch (e) { }
+    var segmentLength = lengthWithSegment - lengthWithoutSegment;
+
+    return lengthWithoutSegment + segmentFraction * segmentLength;
+  }
+
+  function positionToPc(position, pathElem) {
+    var pathLength = pathElem.hasAttribute("d") ?
+                     pathElem.getTotalLength() :
+                     0;
+    switch (position.unit) {
+      case "seg":
+        return pathLength ?
+               segmentRefToLength(position.value, pathElem) / pathLength :
+               0;
+
+      case "%":
+        return position.value / 100;
+
+      default:
+        return pathLength ? widthToPx(position, pathElem) / pathLength : 0;
+    }
+  }
+
   return function(pathElem) {
     var parseErrors = [];
 
@@ -114,7 +181,7 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
                right: widthToPx(cssWidth.right, pathElem) };
     });
     var pcPositions = positions.map(function(cssPosition) {
-      return parseFloat(cssPosition.value / 100);
+      return positionToPc(cssPosition, pathElem);
     });
 
     // If there are fewer positions than values, fill them in

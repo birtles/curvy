@@ -256,7 +256,7 @@ define(['compute-widths'], function(computeWidths) {
   */
 
   // Convert units
-  test('Unit conversion', function () {
+  test('stroke-widths-values unit conversion', function () {
     pathElem.setAttribute("stroke-widths-values",
       "1px / 2cm, 30mm / 4in, 5em / 6ex, 7pt / 8pc, 9%");
     compareWidthsRough([ [ 0, 1, toPx("2cm") ],
@@ -265,9 +265,47 @@ define(['compute-widths'], function(computeWidths) {
                          [ 0.75, toPx("7pt"), toPx("8pc") ],
                          [ 1, 0.09 * 7, 0.09 * 7 ] ],
                        'converts stroke width values');
-    // XXX Do the same for the positions
-    // XXX Do the same for the shorthand
   });
+
+  test('stroke-widths-positions unit conversion', function () {
+    // Regular units
+    pathElem.setAttribute("d", "M0 0h100");
+    pathElem.setAttribute("stroke-widths-values",
+      "1px, 1px, 1px, 1px, 1px, 1px, 1px, 1px, 1px");
+    pathElem.setAttribute("stroke-widths-positions",
+      "1px, 0.2cm, 3mm, 0.4in, 3em, 8ex, 50pt, 5pc, 95%");
+    compareWidthsRough([ [ 0, 1, 1 ],
+                         [ 0.01, 1, 1 ],
+                         [ toPx("0.2cm") / 100, 1, 1 ],
+                         [ toPx("3mm") / 100, 1, 1 ],
+                         [ toPx("0.4in") / 100, 1, 1 ],
+                         [ toPx("3em") / 100, 1, 1 ],
+                         [ toPx("8ex") / 100, 1, 1 ],
+                         [ toPx("50pt") / 100, 1, 1 ],
+                         [ toPx("5pc") / 100, 1, 1 ],
+                         [ 0.95, 1, 1 ],
+                         [ 1, 1, 1 ] ],
+                       'converts stroke position values');
+
+    // Seg units
+    pathElem.setAttribute("d", "M0 0h100v50h-50");
+    pathElem.setAttribute("stroke-widths-values",
+      "1px, 1px, 1px");
+    pathElem.setAttribute("stroke-widths-positions",
+      "0.5seg, 2seg, 2.5seg");
+    compareWidthsRough([ [ 0, 1, 1 ],
+                         [ 0.25, 1, 1 ],
+                         [ 0.75, 1, 1 ],
+                         [ 0.875, 1, 1 ],
+                         [ 1, 1, 1 ] ],
+                       'converts stroke position values');
+  });
+
+  /*
+  test('stroke-widths unit conversion', function () {
+    // XXX
+  });
+  */
 
   function toPx(str) {
     var rect = document.createElementNS(SVG_NS, "rect");
