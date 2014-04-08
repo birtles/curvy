@@ -112,6 +112,8 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
   }
 
   function positionToPc(position, pathElem) {
+    if (!position)
+      return null;
     var pathLength = pathElem.hasAttribute("d") ?
                      pathElem.getTotalLength() :
                      0;
@@ -155,14 +157,21 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       parseCSSValue(window.getComputedStyle(pathElem).strokeWidth)[0];
     var widths = [];
     var positions = [];
-    if (!properties.strokeWidthsValues) {
+    if (!properties.strokeWidthsValues && !properties.strokeWidths) {
       widths = [ { left: baseStrokeWidth, right: baseStrokeWidth } ];
     } else {
-      properties.strokeWidthsValues.forEach(function(widthValue, index) {
+      var widthSource =
+        properties.strokeWidthsValues || properties.strokeWidths.widths;
+      widthSource.forEach(function(widthValue, index) {
         widths.push({ left:  widthValue.left,
                       right: widthValue.right || widthValue.left });
       });
-      positions = properties.strokeWidthsPositions;
+      positions = properties.strokeWidthsPositions ||
+        properties.strokeWidths ?
+        properties.strokeWidths.widths.map(function(width) {
+          return width.position;
+        }) :
+        null;
     }
 
     // Fill in positions
@@ -183,6 +192,11 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     var pcPositions = positions.map(function(cssPosition) {
       return positionToPc(cssPosition, pathElem);
     });
+
+    // Trim null values
+    while (pcPositions[pcPositions.length - 1] === null) {
+      pcPositions.splice(pcPositions.length - 1);
+    }
 
     // Clamp positions so they are in ascending order
     var prev = Number.NEGATIVE_INFINITY;
@@ -249,9 +263,7 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
                right: pxWidth.right };
     });
 
-    return {
-              widths: combinedWidths,
-              parseErrors: parseErrors
-           };
+    return { widths: combinedWidths,
+             parseErrors: parseErrors };
   }
 });

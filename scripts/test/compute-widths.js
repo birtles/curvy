@@ -247,13 +247,17 @@ define(['compute-widths'], function(computeWidths) {
 
   // Extend positions (by 1seg) when all positions are segments
 
-  /*
   test('Shorthand only', function () {
+    pathElem.setAttribute("stroke-widths", "1px / 2px 10%, 30px 50%, 50px");
+    compareWidths([ [ 0, 1, 2 ],
+                    [ 0.1, 1, 2 ],
+                    [ 0.5, 30, 30 ],
+                    [ 1, 50, 50 ] ],
+                  'stroke-widths: 1px / 2px 10%, 30px 50%, 50px');
   });
 
-  test('Shorthand and longhand', function () {
-  });
-  */
+  // XXX Shorthand and longhand
+  // XXX Fill in gaps in positions list in shorthand
 
   // Convert units
   test('stroke-widths-values unit conversion', function () {
@@ -298,7 +302,7 @@ define(['compute-widths'], function(computeWidths) {
                          [ 0.75, 1, 1 ],
                          [ 0.875, 1, 1 ],
                          [ 1, 1, 1 ] ],
-                       'converts stroke position values');
+                       'converts seg stroke position values');
   });
 
   /*
