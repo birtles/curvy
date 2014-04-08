@@ -10,6 +10,58 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     return a.left === b.left && a.right === b.right;
   }
 
+  function getEmSize(elem) {
+    return getFontSize(elem, "em");
+  }
+
+  function getExSize(elem) {
+    return getFontSize(elem, "ex");
+  }
+
+  function getFontSize(elem, unit) {
+    var elem = elem.ownerDocument.documentElement;
+    var oldMarginBottom = elem.marginBottom;
+    elem.style.marginBottom = "1" + unit;
+    var px = parseFloat(window.getComputedStyle(elem).marginBottom);
+    elem.style.marginBottom = oldMarginBottom;
+    return px;
+  }
+
+  function widthToPx(width, pathElem) {
+    switch (width.unit) {
+      case "px":
+        return width.value;
+
+      case "cm":
+        return width.value * 96 / 2.54;
+
+      case "mm":
+        return width.value * 96 / 2.54 / 10;
+
+      case "in":
+        return width.value * 96;
+
+      case "em":
+        return width.value * getEmSize(pathElem);
+
+      case "ex":
+        return width.value * getExSize(pathElem);
+
+      case "pt":
+        return width.value * 96 / 72;
+
+      case "pc":
+        return width.value * 96 / 72 * 12;
+
+      case "%":
+        return width.value / 100 *
+          parseFloat(window.getComputedStyle(pathElem).strokeWidth);
+
+      default:
+        return width.value;
+    }
+  }
+
   return function(pathElem) {
     var parseErrors = [];
 
@@ -58,8 +110,8 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
 
     // Convert values
     var pxWidths = widths.map(function(cssWidth) {
-      return { left: cssWidth.left.value,
-               right: cssWidth.right.value };
+      return { left: widthToPx(cssWidth.left, pathElem),
+               right: widthToPx(cssWidth.right, pathElem) };
     });
     var pcPositions = positions.map(function(cssPosition) {
       return parseFloat(cssPosition.value / 100);

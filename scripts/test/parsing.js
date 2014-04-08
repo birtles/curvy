@@ -7,7 +7,7 @@ define(['stroke-parser'], function(StrokeParser) {
 
   test('stroke-widths-values: parse values', function() {
     var result =
-      StrokeParser.parseStrokeWidthsValues("1px, 30em , 50% ,2.3mm,0, 5rem");
+      StrokeParser.parseStrokeWidthsValues("1px, 30em , 50% ,2.3mm,0, 5ex");
     var isArray = Array.isArray(result);
     ok(isArray, "parses width values list");
     if (!isArray)
@@ -23,8 +23,8 @@ define(['stroke-parser'], function(StrokeParser) {
               "parses seg lengths");
     deepEqual(result[4], { left: { value: 0, unit: "" }, right: null },
               "parses 0 values");
-    deepEqual(result[5], { left: { value: 5, unit: "rem" }, right: null },
-              "parses rem lengths");
+    deepEqual(result[5], { left: { value: 5, unit: "ex" }, right: null },
+              "parses ex lengths");
   });
 
   test('stroke-widths-values: parse asymmetric values', function() {

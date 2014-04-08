@@ -29,6 +29,28 @@ define(['compute-widths'], function(computeWidths) {
               desc);
   }
 
+  function compareWidthsRough(expected, desc) {
+    var round = function(val) {
+      return parseFloat(val.toFixed(4));
+    };
+    var approximateWidths = function(widths) {
+      return widths.map(function(width) {
+               return { left: round(width.left),
+                        right: round(width.right),
+                        offset: round(width.offset) };
+             });
+    };
+
+    var actual = computeWidths(pathElem);
+    actual.widths = approximateWidths(actual.widths);
+    var expected =
+      { widths: approximateWidths(expected.map(function(item) {
+                  return { offset: item[0], left: item[1], right: item[2] };
+                 })),
+        parseErrors: [] };
+    deepEqual(actual, expected, desc);
+  }
+
   test('Nothing specified', function() {
     compareWidths([ [ 0, 7, 7 ], [ 1, 7, 7 ] ], 'Nothing specified');
   });
@@ -234,5 +256,28 @@ define(['compute-widths'], function(computeWidths) {
   */
 
   // Convert units
+  test('Unit conversion', function () {
+    pathElem.setAttribute("stroke-widths-values",
+      "1px / 2cm, 30mm / 4in, 5em / 6ex, 7pt / 8pc, 9%");
+    compareWidthsRough([ [ 0, 1, toPx("2cm") ],
+                         [ 0.25, toPx("30mm"), toPx("4in") ],
+                         [ 0.5, toPx("5em"), toPx("6ex") ],
+                         [ 0.75, toPx("7pt"), toPx("8pc") ],
+                         [ 1, 0.09 * 7, 0.09 * 7 ] ],
+                       'converts stroke width values');
+    // XXX Do the same for the positions
+    // XXX Do the same for the shorthand
+  });
+
+  function toPx(str) {
+    var rect = document.createElementNS(SVG_NS, "rect");
+    svgRoot.appendChild(rect);
+    var length = rect.x.baseVal;
+    length.valueAsString = str;
+    var pxResult = length.value;
+    svgRoot.removeChild(rect);
+    return pxResult;
+  }
+
   // Ordering of positions
 });
