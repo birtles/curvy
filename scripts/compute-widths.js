@@ -184,6 +184,13 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       return positionToPc(cssPosition, pathElem);
     });
 
+    // Clamp positions so they are in ascending order
+    var prev = Number.NEGATIVE_INFINITY;
+    var pcPositions = pcPositions.map(function(position) {
+      prev = Math.max(prev, position);
+      return prev;
+    });
+
     // If there are fewer positions than values, fill them in
     if (pcPositions.length < pxWidths.length) {
       var lower = pcPositions[pcPositions.length - 1];

@@ -307,6 +307,21 @@ define(['compute-widths'], function(computeWidths) {
   });
   */
 
+  // Ordering of positions
+  test('Position ordering', function () {
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px, 30px, 40px");
+    pathElem.setAttribute("stroke-widths-positions", "10%, 0%, 40%, 30%");
+    compareWidths([ [ 0, 10, 10 ],
+                    [ 0.1, 10, 10 ],
+                    [ 0.1, 20, 20 ],
+                    [ 0.4, 30, 30 ],
+                    [ 0.4, 40, 40 ],
+                    [ 1, 40, 40 ] ],
+                    'puts positions in order');
+
+    // XXX test with the shorthand
+  });
+
   function toPx(str) {
     var rect = document.createElementNS(SVG_NS, "rect");
     svgRoot.appendChild(rect);
@@ -316,6 +331,4 @@ define(['compute-widths'], function(computeWidths) {
     svgRoot.removeChild(rect);
     return pxResult;
   }
-
-  // Ordering of positions
 });
