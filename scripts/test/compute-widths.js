@@ -148,6 +148,83 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-positions: 50%, 120%');
   });
 
+  test('Repeating patterns', function() {
+    // Starting at 0
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "0%, 20%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ 0, 10, 10 ], [ 0.2, 20, 20 ],
+                    [ 0.2, 10, 10 ], [ 0.4, 20, 20 ],
+                    [ 0.4, 10, 10 ], [ 0.6, 20, 20 ],
+                    [ 0.6, 10, 10 ], [ 0.8, 20, 20 ],
+                    [ 0.8, 10, 10 ], [ 1.0, 20, 20 ] ],
+                  'stroke-widths-values: 10px, 20px; ' +
+                  'stroke-widths-positions: 0%, 20%; ' +
+                  'stroke-widths-repeat: repeat');
+
+    // Starting at 0 and returning to the same value
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px, 10px");
+    pathElem.setAttribute("stroke-widths-positions", "0%, 20%, 40%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ 0, 10, 10 ],
+                    [ 0.2, 20, 20 ],
+                    [ 0.4, 10, 10 ],
+                    [ 0.6, 20, 20 ],
+                    [ 0.8, 10, 10 ],
+                    [ 1.0, 20, 20 ] ],
+                  'stroke-widths-values: 10px, 20px, 10px; ' +
+                  'stroke-widths-positions: 0%, 20%, 40%; ' +
+                  'stroke-widths-repeat: repeat');
+
+    // Starting at 20%
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "20%, 40%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ 0, 10, 10 ],
+                    [ 0.2, 10, 10 ],
+                    [ 0.4, 20, 20 ],
+                    [ 0.4, 10, 10 ],
+                    [ 0.6, 10, 10 ],
+                    [ 0.8, 20, 20 ],
+                    [ 0.8, 10, 10 ],
+                    [ 1.0, 10, 10 ] ],
+                  'stroke-widths-values: 10px, 20px; ' +
+                  'stroke-widths-positions: 20%, 40%; ' +
+                  'stroke-widths-repeat: repeat');
+
+    // Starting before 0
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "-20%, 30%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ -0.2, 10, 10 ],
+                    [ 0.3, 20, 20 ], [ 0.3, 10, 10 ],
+                    [ 0.8, 20, 20 ], [ 0.8, 10, 10 ],
+                    [ 1.3, 20, 20 ] ],
+                  'stroke-widths-values: 10px, 20px; ' +
+                  'stroke-widths-positions: -20%, 30%; ' +
+                  'stroke-widths-repeat: repeat');
+
+    // Single value
+    pathElem.setAttribute("stroke-widths-values", "10px");
+    pathElem.setAttribute("stroke-widths-positions", "0%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ 0, 10, 10 ], [ 1, 10, 10 ] ],
+                  'stroke-widths-values: 10px; ' +
+                  'stroke-widths-positions: 0%; ' +
+                  'stroke-widths-repeat: repeat');
+
+    // No distance
+    pathElem.setAttribute("stroke-widths-values", "10px, 20px");
+    pathElem.setAttribute("stroke-widths-positions", "0%, 0%");
+    pathElem.setAttribute("stroke-widths-repeat", "repeat");
+    compareWidths([ [ 0, 10, 10 ], [ 0, 20, 20 ], [ 1, 20, 20 ] ],
+                  'stroke-widths-values: 10px; ' +
+                  'stroke-widths-positions: 0%; ' +
+                  'stroke-widths-repeat: repeat');
+  });
+
+  // Extend positions (by 1seg) when all positions are segments
+
   /*
   test('Shorthand only', function () {
   });
@@ -155,4 +232,7 @@ define(['compute-widths'], function(computeWidths) {
   test('Shorthand and longhand', function () {
   });
   */
+
+  // Convert units
+  // Ordering of positions
 });

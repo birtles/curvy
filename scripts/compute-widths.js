@@ -6,6 +6,10 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       function(match, letter) { return letter.toUpperCase(); })
   }
 
+  function widthsEqual(a, b) {
+    return a.left === b.left && a.right === b.right;
+  }
+
   return function(pathElem) {
     var parseErrors = [];
 
@@ -52,15 +56,13 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       positions = [ { value: 0, unit: "%" } ];
     }
 
-    // Apply repeating, list length adjustment
-
     // Convert values
     var pxWidths = widths.map(function(cssWidth) {
       return { left: cssWidth.left.value,
                right: cssWidth.right.value };
     });
     var pcPositions = positions.map(function(cssPosition) {
-      return cssPosition.value / 100;
+      return parseFloat(cssPosition.value / 100);
     });
 
     // If there are fewer positions than values, fill them in
@@ -71,6 +73,47 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       for (var i = 1; i <= items; i++) {
         pcPositions.push((i / items) * (upper - lower) + lower);
       }
+    // If there are extra positions, drop them
+    } else if (pxWidths.length < pcPositions.length) {
+      pcPositions.splice(pxWidths.length);
+    }
+
+    // Make sure there is a position at or before 0
+    if (pcPositions[0] > 0) {
+      pcPositions.unshift(0);
+      pxWidths.unshift(pxWidths[0]);
+    }
+
+    // Make sure there is a position at or after 1 using the repeat mode if set
+    if (properties.strokeWidthsRepeat === StrokeParser.RepeatMode.Repeat) {
+      var listPos = 0;
+      var originalListLength = pcPositions.length;
+      var patternLength = pcPositions[pcPositions.length - 1] - pcPositions[0];
+      var offset = patternLength;
+      while (patternLength > 0 && pcPositions[pcPositions.length - 1] < 1) {
+        var newPosition =
+          parseFloat((offset + pcPositions[listPos]).toFixed(5));
+
+        // Skip identical values
+        if (newPosition != pcPositions[pcPositions.length - 1] ||
+            !widthsEqual(pxWidths[listPos], pxWidths[pxWidths.length - 1])) {
+          pcPositions.push(newPosition);
+          pxWidths.push(pxWidths[listPos]);
+        }
+
+        listPos++;
+        if (listPos >= originalListLength) {
+          offset += patternLength;
+          listPos = 0;
+        }
+      }
+    }
+
+    // Make sure the last position is 1 or greater (for the case where there is
+    // no repeating behavior or the pattern length is 0)
+    if (pcPositions[pcPositions.length - 1] < 1) {
+      pcPositions.push(1);
+      pxWidths.push(pxWidths[pxWidths.length - 1]);
     }
 
     // Merge arrays
@@ -79,22 +122,6 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
                left: pxWidth.left,
                right: pxWidth.right };
     });
-
-    // Make sure there is a position at or before 0
-    var first = combinedWidths[0];
-    if (first.offset > 0) {
-      combinedWidths.unshift({ left: first.left,
-                               right: first.right,
-                               offset: 0 });
-    }
-
-    // Make sure there is a position at or after 1
-    var last = combinedWidths[combinedWidths.length - 1];
-    if (last.offset < 1) {
-      combinedWidths.push({ left: last.left,
-                            right: last.right,
-                            offset: 1 });
-    }
 
     return {
               widths: combinedWidths,

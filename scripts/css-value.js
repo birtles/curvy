@@ -54,7 +54,7 @@ define(function(require, exports, module) {
   };
 
   Parser.prototype.int = function(){
-    var m = /^((\d+)([a-z%]+)?) */.exec(this.str);
+    var m = /^((-?\d+)([a-z%]+)?) */.exec(this.str);
     if (!m) return;
     this.skip(m);
     var n = ~~m[2];
@@ -69,7 +69,7 @@ define(function(require, exports, module) {
   };
 
   Parser.prototype.float = function(){
-    var m = /^(((?:\d+)?\.\d+)([a-z%]+)?) */.exec(this.str);
+    var m = /^((-?(?:\d+)?\.\d+)([a-z%]+)?) */.exec(this.str);
     if (!m) return;
     this.skip(m);
     var n = parseFloat(m[2]);
