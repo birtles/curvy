@@ -1,5 +1,6 @@
-require(["test-cases", "batch-dispatch", "domReady!"],
-  function(predefinedTests, BatchTimer) {
+require(["test-cases", "batch-dispatch", "compute-widths", "innersvg",
+         "domReady!"],
+  function(predefinedTests, BatchTimer, computeWidths) {
   "use strict";
 
   // Common references
@@ -17,6 +18,7 @@ require(["test-cases", "batch-dispatch", "domReady!"],
     var select = evt.target;
     sourceBox.value = select.options[select.selectedIndex].dataset.src || "";
     updatePermalink();
+    updatePreview();
   });
 
   // Parse URL params
@@ -35,8 +37,6 @@ require(["test-cases", "batch-dispatch", "domReady!"],
   }
 
   // Permalink
-  var sourceBoxLinkTimer = new BatchTimer(updatePermalink, 300);
-  sourceBox.addEventListener("input", sourceBoxLinkTimer.trigger);
   function updatePermalink() {
     var link = document.getElementById("permalink");
     var params = [
@@ -50,4 +50,17 @@ require(["test-cases", "batch-dispatch", "domReady!"],
       }).join("&");
     link.href = "?" + queryString;
   }
+  var sourceBoxLinkTimer = new BatchTimer(updatePermalink, 300);
+  sourceBox.addEventListener("input", sourceBoxLinkTimer.trigger);
+  updatePermalink();
+
+  // Preview
+  function updatePreview() {
+    var source = sourceBox.value;
+    var svgOutput = document.querySelector("svg#rendering");
+    svgOutput.innerSVG = source;
+  }
+  var sourceBoxPreviewTimer = new BatchTimer(updatePreview, 200);
+  sourceBox.addEventListener("input", sourceBoxPreviewTimer.trigger);
+  updatePreview();
 });

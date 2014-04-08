@@ -30,12 +30,13 @@ svg {
     display: block;
     border: 1px solid black;
     flex: auto;
+    margin: 0.8em 0 0.2em;
 }
 section.panel {
     display: inline-flex;
     flex-direction: column;
     vertical-align: top;
-    height: calc(100% - 1em);
+    height: calc(100% - 1.2em);
     width: calc(50% - 1.2em);
     padding: 0.5em;
 }
@@ -65,7 +66,7 @@ section.panel {
           <label><input type="checkbox" name="velocity-weight">velocity</label>
           <label><input type="checkbox" name="pressure-weight">pressure</label>
         </div>
-        <svg id="rendering">
+        <svg id="rendering" viewBox="0 0 100 100">
         </svg>
         <label><input type="checkbox"
           name="show-original-stroke">Show original stroke</label>
