@@ -167,11 +167,11 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
                       right: widthValue.right || widthValue.left });
       });
       positions = properties.strokeWidthsPositions ||
-        properties.strokeWidths ?
-        properties.strokeWidths.widths.map(function(width) {
-          return width.position;
-        }) :
-        null;
+        (properties.strokeWidths ?
+         properties.strokeWidths.widths.map(function(width) {
+           return width.position;
+         }) :
+         null);
     }
 
     // Fill in positions
