@@ -104,7 +104,7 @@ define(["css-value"], function(parseCSSValue) {
     parseStrokeWidths: function(str) {
       // Syntax: [<width>(/<width>)? <position>?]# <repeat>?
       // Split off final repeat
-      var matches = str.match(/(.*?)(?:(?:^| )(repeat|no-repeat))?$/);
+      var matches = str.match(/((?:.|\s)*?)(?:(?:^|\s)(repeat|no-repeat))?$/);
       if (!matches)
         return null;
 

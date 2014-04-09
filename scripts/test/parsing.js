@@ -284,4 +284,23 @@ define(['stroke-parser'], function(StrokeParser) {
     strictEqual(StrokeParser.parseStrokeWidths("1cm 3px, 4cm 5!"),
                 null, "rejects bad syntax");
   });
+
+  test('stroke-widths: multiline', function() {
+    deepEqual(StrokeParser.parseStrokeWidths("1px,\n 2px"),
+              { repeatMode: null,
+                widths: [ { left: { value: 1, unit: "px" },
+                            right: null,
+                            position: null },
+                          { left: { value: 2, unit: "px" },
+                            right: null,
+                            position: null } ] },
+              "parses stroke-widths with newline");
+
+    deepEqual(StrokeParser.parseStrokeWidths("1px\nrepeat"),
+              { repeatMode: StrokeParser.RepeatMode.Repeat,
+                widths: [ { left: { value: 1, unit: "px" },
+                            right: null,
+                            position: null } ] },
+              "parses stroke-widths with newline before repeat mode");
+  });
 });
