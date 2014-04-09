@@ -266,7 +266,49 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths: 1px / 2px 10%, 30px 50%, 50px');
   });
 
-  // XXX Shorthand and longhand
+  test('Shorthand and longhand', function () {
+    pathElem.setAttribute("stroke-widths-positions", "30%, 40%");
+    pathElem.setAttribute("stroke-widths", "10px 10%, 20px 20%");
+    compareWidths([ [ 0, 10, 10 ],
+                    [ 0.3, 10, 10 ],
+                    [ 0.4, 20, 20 ],
+                    [ 1, 20, 20 ] ],
+                  'stroke-widths-positions: 30%, 40%; ' +
+                  'stroke-widths: 10px 10%, 20px 20%');
+
+    pathElem.setAttribute("stroke-widths-values", "30px, 40px");
+    compareWidths([ [ 0, 30, 30 ],
+                    [ 0.3, 30, 30 ],
+                    [ 0.4, 40, 40 ],
+                    [ 1, 40, 40 ] ],
+                  'stroke-widths-positions: 30%, 40%; ' +
+                  'stroke-widths-values: 30px, 40px; ' +
+                  'stroke-widths: 10px 10%, 20px 20%');
+
+    pathElem.setAttribute("stroke-widths", "10px 10%, 20px 20% repeat");
+    compareWidths([ [ 0, 30, 30 ],
+                    [ 0.3, 30, 30 ],
+                    [ 0.4, 40, 40 ],
+                    [ 0.4, 30, 30 ],
+                    [ 0.7, 30, 30 ],
+                    [ 0.8, 40, 40 ],
+                    [ 0.8, 30, 30 ],
+                    [ 1.1, 30, 30 ] ],
+                  'stroke-widths-positions: 30%, 40%; ' +
+                  'stroke-widths-values: 30px, 40px; ' +
+                  'stroke-widths: 10px 10%, 20px 20% repeat');
+
+    pathElem.setAttribute("stroke-widths-repeat", "no-repeat");
+    compareWidths([ [ 0, 30, 30 ],
+                    [ 0.3, 30, 30 ],
+                    [ 0.4, 40, 40 ],
+                    [ 1, 40, 40 ] ],
+                  'stroke-widths-positions: 30%, 40%; ' +
+                  'stroke-widths-values: 30px, 40px; ' +
+                  'stroke-widths-repeat: no-repeat; ' +
+                  'stroke-widths: 10px 10%, 20px 20% repeat');
+  });
+
   // XXX Fill in gaps in positions list in shorthand
 
   // Convert units
