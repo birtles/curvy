@@ -245,6 +245,16 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths-repeat: repeat');
   });
 
+  test('Repeating patterns with shorthand', function() {
+    pathElem.setAttribute("stroke-widths", "10px 0%, 20px 20% repeat");
+    compareWidths([ [ 0, 10, 10 ], [ 0.2, 20, 20 ],
+                    [ 0.2, 10, 10 ], [ 0.4, 20, 20 ],
+                    [ 0.4, 10, 10 ], [ 0.6, 20, 20 ],
+                    [ 0.6, 10, 10 ], [ 0.8, 20, 20 ],
+                    [ 0.8, 10, 10 ], [ 1.0, 20, 20 ] ],
+                  'stroke-widths: 10px 0%, 20px 20% repeat');
+  });
+
   // XXX Extend positions (by 1seg) when all positions are segments
 
   test('Shorthand only', function () {

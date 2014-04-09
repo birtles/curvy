@@ -225,7 +225,11 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
     }
 
     // Make sure there is a position at or after 1 using the repeat mode if set
-    if (properties.strokeWidthsRepeat === StrokeParser.RepeatMode.Repeat) {
+    var repeatMode = typeof properties.strokeWidthsRepeat !== "undefined" ?
+      properties.strokeWidthsRepeat :
+      (properties.strokeWidths && properties.strokeWidths.repeatMode !== null ?
+       properties.strokeWidths.repeatMode : StrokeParser.RepeatMode.NoRepeat);
+    if (repeatMode === StrokeParser.RepeatMode.Repeat) {
       var listPos = 0;
       var originalListLength = pcPositions.length;
       var patternLength = pcPositions[pcPositions.length - 1] - pcPositions[0];
