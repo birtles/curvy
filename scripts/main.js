@@ -59,8 +59,33 @@ require(["test-cases", "batch-dispatch", "compute-widths", "innersvg",
     var source = sourceBox.value;
     var svgOutput = document.querySelector("svg#rendering");
     svgOutput.innerSVG = source;
+
+    // In future we should make this take shapes and convert them to paths
+    [].forEach.call(svgOutput.querySelectorAll("path"), (transformPath));
   }
   var sourceBoxPreviewTimer = new BatchTimer(updatePreview, 200);
   sourceBox.addEventListener("input", sourceBoxPreviewTimer.trigger);
   updatePreview();
+
+  function transformPath(pathElem) {
+    var computeWidthsResult = computeWidths(pathElem);
+    computeWidthsResult.parseErrors.forEach(function(error) {
+      console.log("Error parsing " + error);
+    });
+    computeWidthsResult.widths.forEach(function(width) {
+      showWidthPoint(width, pathElem);
+    });
+  }
+
+  function showWidthPoint(width, pathElem) {
+    var pathLength = pathElem.getTotalLength();
+    var point = pathElem.getPointAtLength(width.offset * pathLength);
+
+    var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", point.x);
+    dot.setAttribute("cy", point.y);
+    dot.setAttribute("r", 3);
+    dot.setAttribute("fill", "red");
+    pathElem.parentNode.insertBefore(dot, pathElem.nextSibling);
+  }
 });
