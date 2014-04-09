@@ -81,11 +81,30 @@ require(["test-cases", "batch-dispatch", "compute-widths", "innersvg",
     var pathLength = pathElem.getTotalLength();
     var point = pathElem.getPointAtLength(width.offset * pathLength);
 
-    var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("cx", point.x);
-    dot.setAttribute("cy", point.y);
-    dot.setAttribute("r", 3);
-    dot.setAttribute("fill", "red");
-    pathElem.parentNode.insertBefore(dot, pathElem.nextSibling);
+    var leftOffset  = Math.max(width.offset - 0.01, 0);
+    var rightOffset = Math.min(width.offset + 0.01, 1);
+    var left  = pathElem.getPointAtLength(leftOffset * pathLength);
+    var right = pathElem.getPointAtLength(rightOffset * pathLength);
+
+    var x = right.x - left.x;
+    var y = right.y - left.y;
+    var angle = (!x && !y) ? 0 : Math.atan2(-y, x);
+    angle += Math.PI / 2;
+
+    var lhs = { x: point.x + Math.cos(angle) * width.left,
+                y: point.y - Math.sin(angle) * width.left };
+    var rhs = { x: point.x - Math.cos(angle) * width.right,
+                y: point.y + Math.sin(angle) * width.right };
+    addLine(lhs, rhs, "fill:none;stroke-width:1px;stroke:red", pathElem);
+  }
+
+  function addLine(a, b, style, after) {
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", a.x);
+    line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x);
+    line.setAttribute("y2", b.y);
+    line.setAttribute("style", style);
+    after.parentNode.insertBefore(line, after.nextSibling);
   }
 });
