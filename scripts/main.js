@@ -81,8 +81,8 @@ require(["test-cases", "batch-dispatch", "compute-widths", "innersvg",
     var pathLength = pathElem.getTotalLength();
     var point = pathElem.getPointAtLength(width.offset * pathLength);
 
-    var leftOffset  = Math.max(width.offset - 0.01, 0);
-    var rightOffset = Math.min(width.offset + 0.01, 1);
+    var leftOffset  = Math.min(Math.max(width.offset - 0.01, 0), 0.99);
+    var rightOffset = Math.max(Math.min(width.offset + 0.01, 1), 0.01);
     var left  = pathElem.getPointAtLength(leftOffset * pathLength);
     var right = pathElem.getPointAtLength(rightOffset * pathLength);
 
