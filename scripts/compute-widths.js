@@ -112,8 +112,9 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
   }
 
   function positionToPc(position, pathElem) {
-    if (!position)
+    if (position === null) {
       return null;
+    }
     var pathLength = pathElem.hasAttribute("d") ?
                      pathElem.getTotalLength() :
                      0;
@@ -128,6 +129,48 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
 
       default:
         return pathLength ? widthToPx(position, pathElem) / pathLength : 0;
+    }
+  }
+
+  function fillInGaps(positions) {
+    if (!positions.length)
+      return;
+
+    var getIndexOfNextNonNull = function(startIndex) {
+      for (var i = startIndex; i < positions.length; i++) {
+        if (positions[i] !== null) {
+          return i;
+        }
+      }
+      return null;
+    };
+
+    var lowerIndex = getIndexOfNextNonNull(0);
+    if (lowerIndex === null)
+      lowerIndex = 0;
+    if (positions[0] === null)
+      positions[0] = Math.min(positions[lowerIndex], 0);
+
+    lowerIndex = 0;
+    for (var i = 1; i < positions.length; i++) {
+      if (positions[i] !== null) {
+        lowerIndex = i;
+        continue;
+      }
+      var lower = positions[lowerIndex];
+      var upperIndex = getIndexOfNextNonNull(i + 1);
+      if (upperIndex === null) {
+        upperIndex = positions.length - 1;
+        upper = Math.max(1, lower);
+        positions[upperIndex] = upper;
+      }
+      var upper = positions[upperIndex];
+      var items = upperIndex - lowerIndex;
+      for (var i = lowerIndex + 1; i < upperIndex; i++) {
+        positions[i] = (((i - lowerIndex) / items) * (upper - lower) + lower);
+      }
+      lowerIndex = upperIndex;
+      i = upperIndex + 1;
     }
   }
 
@@ -193,10 +236,17 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       return positionToPc(cssPosition, pathElem);
     });
 
-    // Trim null values
-    while (pcPositions[pcPositions.length - 1] === null) {
-      pcPositions.splice(pcPositions.length - 1);
+    // Extend the positions array to match the length of the widths array
+    while (pcPositions.length < pxWidths.length) {
+      pcPositions.push(null);
     }
+    // If there are extra positions trim them
+    if (pxWidths.length < pcPositions.length) {
+      pcPositions.splice(pxWidths.length);
+    }
+
+    // Fill in null values
+    fillInGaps(pcPositions);
 
     // Clamp positions so they are in ascending order
     var prev = Number.NEGATIVE_INFINITY;
@@ -204,19 +254,6 @@ define(["stroke-parser", "css-value"], function(StrokeParser, parseCSSValue) {
       prev = Math.max(prev, position);
       return prev;
     });
-
-    // If there are fewer positions than values, fill them in
-    if (pcPositions.length < pxWidths.length) {
-      var lower = pcPositions[pcPositions.length - 1];
-      var upper = Math.max(lower, 1);
-      var items = pxWidths.length - pcPositions.length;
-      for (var i = 1; i <= items; i++) {
-        pcPositions.push((i / items) * (upper - lower) + lower);
-      }
-    // If there are extra positions, drop them
-    } else if (pxWidths.length < pcPositions.length) {
-      pcPositions.splice(pxWidths.length);
-    }
 
     // Make sure there is a position at or before 0
     if (pcPositions[0] > 0) {

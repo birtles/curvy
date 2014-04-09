@@ -255,8 +255,6 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths: 10px 0%, 20px 20% repeat');
   });
 
-  // XXX Extend positions (by 1seg) when all positions are segments
-
   test('Shorthand only', function () {
     pathElem.setAttribute("stroke-widths", "1px / 2px 10%, 30px 50%, 50px");
     compareWidths([ [ 0, 1, 2 ],
@@ -309,8 +307,6 @@ define(['compute-widths'], function(computeWidths) {
                   'stroke-widths: 10px 10%, 20px 20% repeat');
   });
 
-  // XXX Fill in gaps in positions list in shorthand
-
   // Convert units
   test('stroke-widths-values unit conversion', function () {
     pathElem.setAttribute("stroke-widths-values",
@@ -357,13 +353,6 @@ define(['compute-widths'], function(computeWidths) {
                        'converts seg stroke position values');
   });
 
-  /*
-  test('stroke-widths unit conversion', function () {
-    // XXX
-  });
-  */
-
-  // Ordering of positions
   test('Position ordering', function () {
     pathElem.setAttribute("stroke-widths-values", "10px, 20px, 30px, 40px");
     pathElem.setAttribute("stroke-widths-positions", "10%, 0%, 40%, 30%");
@@ -374,9 +363,33 @@ define(['compute-widths'], function(computeWidths) {
                     [ 0.4, 40, 40 ],
                     [ 1, 40, 40 ] ],
                     'puts positions in order');
-
-    // XXX test with the shorthand
   });
+
+  test('Position gaps ordering', function () {
+    pathElem.setAttribute("stroke-widths",
+      "10px, 20px 20%, 30px, 40px, 50px 50%, 75px, 100px");
+    compareWidths([ [ 0, 10, 10 ],
+                    [ 0.2, 20, 20 ],
+                    [ 0.3, 30, 30 ],
+                    [ 0.4, 40, 40 ],
+                    [ 0.5, 50, 50 ],
+                    [ 0.75, 75, 75 ],
+                    [ 1, 100, 100 ] ],
+                    'fills in gaps in position list');
+
+    pathElem.setAttribute("stroke-widths",
+      "10px, 20px -20%, 50px, 120px 120%");
+    compareWidthsRough([ [ -0.2, 10, 10 ],
+                         [ -0.2, 20, 20 ],
+                         [ 0.5, 50, 50 ],
+                         [ 1.2, 120, 120 ] ],
+                         'fills in gaps in position list (2)');
+  });
+
+  // XXX Less positions than values where last position > 1
+  // XXX Position ordering with shorthand
+  // XXX Unit conversion with short hand
+  // XXX Clamping of negative lengths
 
   function toPx(str) {
     var rect = document.createElementNS(SVG_NS, "rect");
